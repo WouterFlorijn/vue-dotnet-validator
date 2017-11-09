@@ -1,4 +1,3 @@
-import util from './util';
 import validators from './validators';
 
 module.exports = (extraValidators = {}) => {
@@ -49,7 +48,7 @@ module.exports = (extraValidators = {}) => {
         // Since vue handles 2-way binding through the 'input' event, we can check if there is something listening to it.
         this.isTwoWayBind = this.$options._parentListeners && !!this.$options._parentListeners.input;
 
-        this.findValidatorGroup();
+        this.findValidatorGroup(this);
         this.findValidators();
         this.addAriaDescribedBy();
 
@@ -81,7 +80,7 @@ module.exports = (extraValidators = {}) => {
       });
     },
     methods: {
-      resolveField(component = this) {
+      resolveField(component) {
           if(!component) {
             return null;
           }

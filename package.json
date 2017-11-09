@@ -1,15 +1,14 @@
 {
-  "name": "vue-dotnet-validator",
-  "version": "0.3.12",
+  "name": "@wouterflorijn/vue-dotnet-validator",
+  "version": "0.3.16",
   "main": "dist/index.js",
   "author": {
-    "name": "Ted de Koning",
-    "email": "ted@q42.nl",
-    "url": "http://q42.com"
+    "name": "Wouter Florijn",
+    "email": "woutermflorijn@gmail.com"
   },
   "license": "MIT",
-  "homepage": "https://github.com/Q42/vue-dotnet-validator",
-  "repository": "Q42/vue-dotnet-validator",
+  "homepage": "https://github.com/WouterFlorijn/vue-dotnet-validator",
+  "repository": "WouterFlorijn/vue-dotnet-validator",
   "scripts": {
     "build": "npm install && npm run test && webpack",
     "test": "karma start",
