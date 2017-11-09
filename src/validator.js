@@ -1,12 +1,11 @@
 import util from './util';
+import validators from './validators';
 
 module.exports = (extraValidators = {}) => {
-  let validators = require('./default-validators');
   // Add extraValidators to the default validators.
   for (var attrname in extraValidators) { validators[attrname] = extraValidators[attrname]; }
 
   const validClass = 'field-validation-valid';
-  let validatorGroup = null;
 
   return {
     props: {
@@ -28,7 +27,8 @@ module.exports = (extraValidators = {}) => {
         isTwoWayBind: false,
         hasChanged: false,
         name: '',
-        field: null
+        field: null,
+        validatorGroup: null
       };
     },
     mounted() {
@@ -49,8 +49,7 @@ module.exports = (extraValidators = {}) => {
         // Since vue handles 2-way binding through the 'input' event, we can check if there is something listening to it.
         this.isTwoWayBind = this.$options._parentListeners && !!this.$options._parentListeners.input;
 
-        validatorGroup = util.findValidatorGroup(this);
-
+        this.findValidatorGroup();
         this.findValidators();
         this.addAriaDescribedBy();
 
@@ -70,16 +69,19 @@ module.exports = (extraValidators = {}) => {
         }
         this.field.addEventListener('change', this.changeField);
         this.field.addEventListener('input', this.changeField);
-        validatorGroup.addValidator(this);
+
+        if (this.validatorGroup)
+          this.validatorGroup.addValidator(this);
       });
     },
     destroyed() {
       this.$nextTick(() => {
-        validatorGroup.removeValidator(this);
+        if (this.validatorGroup)
+          this.validatorGroup.removeValidator(this);
       });
     },
     methods: {
-      resolveField(component) {
+      resolveField(component = this) {
           if(!component) {
             return null;
           }
@@ -125,8 +127,16 @@ module.exports = (extraValidators = {}) => {
             // Validator should not be activated
             return;
           }
-          this.validators.push(new validators[validatorKey](validationMessage, dataAttributes, validatorGroup));
+          this.validators.push(new validators[validatorKey](validationMessage, dataAttributes, this.validatorGroup));
         });
+      },
+      findValidatorGroup(component) {
+        if (!component.$parent)
+          return;
+        else if (component.$parent.isValidatorGroup)
+          this.validatorGroup = component.$parent;
+        else
+          this.findValidatorGroup(component.$parent);
       },
       showValidationMessage() {
         if(!this.blurred) {
