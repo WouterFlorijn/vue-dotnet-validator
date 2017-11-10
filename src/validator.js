@@ -119,7 +119,7 @@ export default (extraValidators = {}) => {
 				this.hasChanged = true;
 				this.$emit('change-field', this);
 				this.showValidationMessage();
-			},
+			}
 		},
 		computed: {
 			isValid() {
@@ -141,6 +141,9 @@ export default (extraValidators = {}) => {
 			},
 			isCheckbox() {
 				return this.type == 'checkbox';
+			},
+			inputAttrs() {
+				return Object.assign(this.$attrs, this.$props);
 			}
 		}
 	}
