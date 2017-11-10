@@ -4,7 +4,7 @@ function getFakeValidatorGroup(value) {
   return {
     findValidatorsByName() {
       return [{
-        val: value
+        inputValue: value
       }];
     }
   };

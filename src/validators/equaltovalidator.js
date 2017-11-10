@@ -12,7 +12,7 @@ class EqualToValidator extends BaseValidator {
     }
     const otherField = fields[0];
 
-    return !value || !otherField || value == otherField.val;
+    return !value || !otherField || value == otherField.inputValue;
   }
 }
 
