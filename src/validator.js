@@ -18,12 +18,15 @@ export default (extraValidators = {}) => {
 			type: {
 				type: String,
 				default: ''
+			},
+			message: {
+				type: String,
+				default: ''
 			}
 		},
 		data() {
 			return {
 				fields: null,
-				message: null,
 				inputValue: this.value,
 				validators: [],
 				validatorGroup: null,
@@ -33,8 +36,6 @@ export default (extraValidators = {}) => {
 		mounted() {
 			this.$nextTick(() => {
 				this.initFields();
-
-				this.initMessage();
 
 				this.validatorGroup = this.findValidatorGroup(this);
 
@@ -69,11 +70,6 @@ export default (extraValidators = {}) => {
 					field.addEventListener('input', this.changeField);
 				});
 			},
-			initMessage() {
-				this.message = this.$refs.message;
-				if (this.message.innerText)
-					this.showMessage = true;
-			},
 			findValidatorGroup(component) {
 				if (!component.$parent)
 					return;
@@ -93,32 +89,22 @@ export default (extraValidators = {}) => {
 					this.validators.push(new validators[validatorKey](msg, dataAttributes, this.validatorGroup));
 				});
 			},
-			showValidationMessage() {
-				if (this.showMessage)
-					this.message.innerHTML = this.validationMessage;
-			},
 			blurField(event) {
 				if (event)
-					this.inputValue = event.target.value;
+					this.setValue(event);
 
 				this.showMessage = true;
-				this.$emit('blur-field', this);
-				this.showValidationMessage();
 			},
 			changeField(event) {
 				if (event)
 				{
 					if (this.isCheckbox)
-					{
 						this.showMessage = true;
-						this.inputValue = event.target.checked ? event.target.value : '';
-					}
-					else
-						this.inputValue = event.target.value;
+					this.setValue(event);
 				}
-				this.hasChanged = true;
-				this.$emit('change-field', this);
-				this.showValidationMessage();
+			},
+			setValue(event) {
+				this.inputValue = event.target.value;
 			}
 		},
 		computed: {
@@ -128,14 +114,14 @@ export default (extraValidators = {}) => {
 				}).length === this.validators.length;
 			},
 			validationMessage() {
+				if (!this.showMessage)
+					return this.message;
+
 				let msg = '';
 				this.validators.forEach(validator => {
 					if (!validator.isValid(this.inputValue) && !msg)
 						msg = validator.getMessage();
 				});
-
-				if (!msg && !this.hasChanged)
-					msg = this.message.innerHTML;
 
 				return msg;
 			},
