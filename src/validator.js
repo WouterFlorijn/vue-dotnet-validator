@@ -8,7 +8,6 @@ export default (extraValidators = {}) => {
 	return {
 		props: {
 			value: {
-				type: String,
 				default: ''
 			},
 			name: {
@@ -26,7 +25,6 @@ export default (extraValidators = {}) => {
 		},
 		data() {
 			return {
-				fields: null,
 				inputValue: this.value,
 				validators: [],
 				validatorGroup: null,
@@ -35,8 +33,6 @@ export default (extraValidators = {}) => {
 		},
 		mounted() {
 			this.$nextTick(() => {
-				this.initFields();
-
 				this.validatorGroup = this.findValidatorGroup(this);
 
 				this.loadValidators();
@@ -46,30 +42,6 @@ export default (extraValidators = {}) => {
 			})
 		},
 		methods: {
-			findFields(component) {
-				if (!component)
-					return null;
-				if (component.$refs.field)
-				{
-					if (Array.isArray(component.$refs.field))
-						return component.$refs.field;
-					else
-						return [component.$refs.field];
-				}
-				if (component.$children.length > 0)
-					return component.$children.map(child => this.findFields(child)).filter(result => !!result)[0];
-				return null;
-			},
-			initFields() {
-				this.fields = this.findFields(this);
-
-				this.fields.forEach(field => {
-					if (!this.isCheckbox)
-						field.addEventListener('blur', this.blurField);
-					field.addEventListener('change', this.changeField);
-					field.addEventListener('input', this.changeField);
-				});
-			},
 			findValidatorGroup(component) {
 				if (!component.$parent)
 					return;
@@ -90,27 +62,24 @@ export default (extraValidators = {}) => {
 				});
 			},
 			blurField(event) {
-				if (event)
-					this.setValue(event);
-
+				this.setValue(event);
 				this.showMessage = true;
 			},
 			changeField(event) {
-				if (event)
-				{
-					if (this.isCheckbox)
-						this.showMessage = true;
-					this.setValue(event);
-				}
+				this.setValue(event);
 			},
 			setValue(event) {
-				this.inputValue = event.target.value;
+				if (event && event.target)
+					this.inputValue = event.target.value;
 			}
 		},
 		computed: {
+			realValue() {
+				return this.inputValue;
+			},
 			isValid() {
 				return this.validators.filter(validator => {
-					return validator.isValid(this.inputValue);
+					return validator.isValid(this.realValue);
 				}).length === this.validators.length;
 			},
 			validationMessage() {
@@ -119,7 +88,7 @@ export default (extraValidators = {}) => {
 
 				let msg = '';
 				this.validators.forEach(validator => {
-					if (!validator.isValid(this.inputValue) && !msg)
+					if (!validator.isValid(this.realValue) && !msg)
 						msg = validator.getMessage();
 				});
 
@@ -129,7 +98,14 @@ export default (extraValidators = {}) => {
 				return this.type == 'checkbox';
 			},
 			inputAttrs() {
-				return Object.assign(this.$attrs, this.$props);
+				return this.$props;
+			},
+			validationEvents() {
+				return {
+					blur: this.blurField,
+					change: this.changeField,
+					input: this.changeField
+				}
 			}
 		}
 	}
